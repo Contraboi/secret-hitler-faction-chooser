@@ -13,7 +13,6 @@
   function handleReveal() {
     currentPlayer = game.revealNextPlayer();
     isRevealed = true;
-    isRevealPhaseDone = game.isRevealPhaseDone();
   }
 
   function peekPlayerFaction(player: string) {
@@ -45,13 +44,15 @@
 
 {#if isRevealed && !isRevealPhaseDone}
   <p>Players revaled {currentPlayer} / {game.state.numberOfPlayers}</p>
+  <!-- svelte-ignore a11y-click-events-have-key-events -->
   <div
     tabindex="0"
     role="button"
     class="card revaled"
-    on:click={() => (isRevealed = false)}
-    on:keydown={(e) =>
-      e.key === "Enter" || (e.key === "Space" && (isRevealed = false))}
+    on:click={() => {
+      isRevealed = false;
+      isRevealPhaseDone = game.isRevealPhaseDone();
+    }}
   >
     <strong class={game.getPlayerFaction(currentPlayer - 1)}
       >{game.getPlayerFaction(currentPlayer - 1)}</strong
@@ -62,6 +63,7 @@
 {#if isRevealPhaseDone}
   <div class="card-grid">
     {#each Object.keys(game.state.players) as key}
+      <!-- svelte-ignore a11y-click-events-have-key-events -->
       <div
         tabindex="0"
         role="button"
@@ -73,8 +75,6 @@
             peekPlayerFaction(key);
           }
         }}
-        on:keydown={(e) =>
-          e.key === "Enter" || (e.key === "Space" && peekPlayerFaction(key))}
       >
         {#if isRevealed && currentPlayer === parseInt(key)}
           <strong class={game.getPlayerFaction(parseInt(key))}
