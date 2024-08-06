@@ -1,10 +1,9 @@
 <script lang="ts">
-  import { possibleNumberOfPlayers } from "./game-state";
   export let selected = -1;
 </script>
 
 <div class="container">
-  {#each possibleNumberOfPlayers as playerCount}
+  {#each [5, 6, 7, 8, 9, 10] as playerCount}
     <button class="box" on:click={() => (selected = playerCount)}>
       {playerCount}
     </button>

@@ -2,8 +2,6 @@ const playerRoles = ["hitler", "liberal", "fascist"] as const;
 type Role = typeof playerRoles[number];
 type PlayerRoleCount = Record<Role, number>;
 
-export const possibleNumberOfPlayers = [5, 6, 7, 8, 9, 10] as const;
-
 export function loadGame(): GameState | null {
   try {
     const str = window.localStorage.getItem(GAME_STATE_KEY)
