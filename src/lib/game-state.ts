@@ -1,12 +1,12 @@
-const playerFactions = ["hitler", "liberal", "fascist"] as const;
-type Faction = typeof playerFactions[number];
-type PlayerCount = Record<Faction, number>;
+const playerRoles = ["hitler", "liberal", "fascist"] as const;
+type Role = typeof playerRoles[number];
+type PlayerRoleCount = Record<Role, number>;
 
-export const possiblePlayeroCounts = [5, 6, 7, 8, 9, 10] as const;
+export const possibleNumberOfPlayers = [5, 6, 7, 8, 9, 10] as const;
 
 export function loadGame(): GameState | null {
   try {
-    const str = window.localStorage.getItem(GAME_KEY)
+    const str = window.localStorage.getItem(GAME_STATE_KEY)
 
     if (!str) return null
 
@@ -17,46 +17,29 @@ export function loadGame(): GameState | null {
   }
 }
 
-const gamePlayerPossibilites: Record<number, PlayerCount> = {
-  5: {
-    liberal: 3,
-    fascist: 1,
-    hitler: 1,
-  },
-  6: {
-    liberal: 4,
-    fascist: 1,
-    hitler: 1,
-  },
-  7: {
-    liberal: 4,
-    fascist: 2,
-    hitler: 1,
-  },
-  8: {
-    liberal: 5,
-    fascist: 2,
-    hitler: 1,
-  },
-  9: {
-    liberal: 5,
-    fascist: 3,
-    hitler: 1,
-  },
-  10: {
-    liberal: 6,
-    fascist: 3,
-    hitler: 1,
+function calculatePlayerDistribution(playerCount: number): PlayerRoleCount {
+  if (playerCount < 5) {
+    throw new Error('Minimum number of players is 5');
   }
-};
 
-const GAME_KEY = "shgsid"
+  const hitler = 1;
+  const liberals = Math.round(playerCount * 0.6);
+  const fascists = playerCount - liberals - hitler;
+
+  return {
+    liberal: liberals,
+    fascist: fascists,
+    hitler
+  };
+}
+
+const GAME_STATE_KEY = "shgsid"
 
 export type GameState = {
   currentPlayer: number;
   numberOfPlayers: number;
-  playerCount: PlayerCount;
-  players: Record<number, Faction>;
+  playerRoleCount: PlayerRoleCount;
+  players: Record<number, Role>;
 };
 
 export function startGame(numberOfPlayers: number, gameState: GameState | null) {
@@ -64,37 +47,27 @@ export function startGame(numberOfPlayers: number, gameState: GameState | null) 
     numberOfPlayers = gameState.numberOfPlayers
   }
 
-  if (numberOfPlayers < 5 || numberOfPlayers > 10) throw new Error("Number of players must be between 5 and 10");
-
   const state: GameState = gameState ?? {
     numberOfPlayers,
     currentPlayer: 0,
-    playerCount: gamePlayerPossibilites[numberOfPlayers],
+    playerRoleCount: calculatePlayerDistribution(numberOfPlayers),
     players: {}
-  };
-
-  const usedPlayerTypes: PlayerCount = {
-    liberal: 0,
-    fascist: 0,
-    hitler: 0,
   };
 
   function revealNextPlayer() {
     if (state.currentPlayer === state.numberOfPlayers) return -1;
 
     state.currentPlayer++;
-    const faction = state.players[state.currentPlayer];
-    usedPlayerTypes[faction]++;
     saveGame()
 
     return state.currentPlayer;
   }
 
   function assignFactions() {
-    let factions: Faction[] = [];
+    let factions: Role[] = [];
 
-    for (const type of playerFactions) {
-      for (let i = 0; i < state.playerCount[type]; i++) {
+    for (const type of playerRoles) {
+      for (let i = 0; i < state.playerRoleCount[type]; i++) {
         factions.push(type);
       }
     }
@@ -108,19 +81,16 @@ export function startGame(numberOfPlayers: number, gameState: GameState | null) 
     for (let i = 0; i < factions.length; i++) {
       state.players[i] = factions[i];
     }
+
+    saveGame()
   }
 
   function saveGame() {
     try {
-      window.localStorage.setItem(GAME_KEY, btoa(JSON.stringify(state)))
+      window.localStorage.setItem(GAME_STATE_KEY, btoa(JSON.stringify(state)))
     } catch (e) {
       console.log(e)
     }
-  }
-
-
-  function getPossiblePlayerCounts() {
-    return Object.keys(gamePlayerPossibilites)
   }
 
   function getPlayerFaction(player: number) {
@@ -132,14 +102,12 @@ export function startGame(numberOfPlayers: number, gameState: GameState | null) 
   }
 
   assignFactions();
-  saveGame()
 
   return {
     revealNextPlayer,
     saveGame,
     loadGame,
     state,
-    getPossiblePlayerCounts,
     getPlayerFaction,
     isRevealPhaseDone
   };
