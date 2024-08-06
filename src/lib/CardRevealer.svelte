@@ -13,6 +13,7 @@
   function handleReveal() {
     currentPlayer = game.revealNextPlayer();
     isRevealed = true;
+    isRevealPhaseDone = game.isRevealPhaseDone();
   }
 
   function peekPlayerFaction(player: string) {
@@ -31,7 +32,7 @@
   <div
     tabindex="0"
     role="button"
-    class="card"
+    class="card padded-card"
     on:click={() => handleReveal()}
     on:keydown={(e) =>
       e.key === "Enter" || (e.key === "Space" && handleReveal())}
@@ -48,7 +49,7 @@
   <div
     tabindex="0"
     role="button"
-    class="card revaled"
+    class="card padded-card revaled"
     on:click={() => {
       isRevealed = false;
       isRevealPhaseDone = game.isRevealPhaseDone();

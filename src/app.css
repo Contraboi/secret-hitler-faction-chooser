@@ -26,6 +26,10 @@
   border: 10px solid black;
 }
 
+.padded-card {
+  padding: 1rem;
+}
+
 body {
   margin: 0;
   display: flex;
