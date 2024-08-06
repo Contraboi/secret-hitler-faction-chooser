@@ -14,6 +14,7 @@
   .container {
     display: flex;
     justify-content: center;
+    flex-wrap: wrap;
     gap: 1rem;
   }
   .box {
