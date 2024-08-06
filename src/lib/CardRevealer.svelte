@@ -34,8 +34,9 @@
     role="button"
     class="card padded-card"
     on:click={() => handleReveal()}
-    on:keydown={(e) =>
-      e.key === "Enter" || (e.key === "Space" && handleReveal())}
+    on:keydown={(e) => {
+      if (e.key === " " || e.key === "Enter") handleReveal();
+    }}
   >
     <p>
       Player <strong>{currentPlayer + 1}</strong> Reveal your faction
@@ -45,7 +46,6 @@
 
 {#if isRevealed && !isRevealPhaseDone}
   <p>Players revaled {currentPlayer} / {game.state.numberOfPlayers}</p>
-  <!-- svelte-ignore a11y-click-events-have-key-events -->
   <div
     tabindex="0"
     role="button"
@@ -53,6 +53,12 @@
     on:click={() => {
       isRevealed = false;
       isRevealPhaseDone = game.isRevealPhaseDone();
+    }}
+    on:keydown={(e) => {
+      if (e.key === " " || e.key === "Enter") {
+        isRevealed = false;
+        isRevealPhaseDone = game.isRevealPhaseDone();
+      }
     }}
   >
     <strong class={game.getPlayerFaction(currentPlayer - 1)}
@@ -64,7 +70,6 @@
 {#if isRevealPhaseDone}
   <div class="card-grid">
     {#each Object.keys(game.state.players) as key}
-      <!-- svelte-ignore a11y-click-events-have-key-events -->
       <div
         tabindex="0"
         role="button"
@@ -74,6 +79,15 @@
             stopPeeking();
           } else {
             peekPlayerFaction(key);
+          }
+        }}
+        on:keydown={(e) => {
+          if (e.key === " " || e.key === "Enter") {
+            if (isRevealed) {
+              stopPeeking();
+            } else {
+              peekPlayerFaction(key);
+            }
           }
         }}
       >
